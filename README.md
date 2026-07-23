@@ -1,14 +1,29 @@
 # HROne Counter Builder
 
-Browser-based validator and counter generator for monthly HROne-to-SAP journal
-extracts.
+HROne-themed validator and counter generator for monthly HROne-to-SAP journal
+extracts. It is available as both a hosted browser application and an offline
+Windows desktop application.
 
-The implemented rule assigns posting keys `40` and `29` to debit, and `50`,
-`34`, and `39` to credit. For each counter it examines at most 999 sequential
-data rows and chooses the latest preceding row where cumulative debit equals
-cumulative credit. If no balanced boundary exists, processing stops and leaves
-the remaining counters blank.
+Posting keys `40` and `29` are debit; `50`, `34`, and `39` are credit. The app
+rejects a source file unless total debit equals total credit. It then creates
+balanced counters containing no more than 999 rows. When a sequential boundary
+is unavailable, it finds exact combinations and reorders complete source rows.
+Every original row must be used exactly once.
 
-The app accepts `.xls`, `.xlsx`, and `.csv`, processes the file locally in the
-browser, previews the result, and exports an `.xlsx` with `COUNTER` as the last
-column.
+The app accepts `.xls`, `.xlsx`, and `.csv`, processes the file locally, and
+exports an `.xlsx` that preserves the source values, dates, and row count while
+appending `DR/CR` and `COUNTER BUILDER`.
+
+## Windows desktop build
+
+The Electron desktop edition uses the same validated React interface and
+counter engine. Network requests are blocked in the desktop shell, so workbook
+processing works without an internet connection or browser login.
+
+Build the Windows installer and portable executable with:
+
+```powershell
+pnpm run desktop:build
+```
+
+Artifacts are written to `outputs/windows`.
