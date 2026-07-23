@@ -21,7 +21,7 @@ type LoadedFile = {
   headers: string[];
   rows: JournalRow[];
   rowNumbers: number[];
-  workbook: XLSX.WorkBook;
+  sourceData: ArrayBuffer;
 };
 
 type ResultDialog = {
@@ -40,6 +40,8 @@ const EMPTY_RESULT: CounterResult = {
   warnings: [],
   errors: [],
   blockedAt: null,
+  rowOrder: [],
+  reordered: false,
 };
 
 function extensionless(fileName: string) {
@@ -87,6 +89,7 @@ export default function Home() {
   const [result, setResult] = useState<CounterResult>(EMPTY_RESULT);
   const [maxRows, setMaxRows] = useState(999);
   const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [dialog, setDialog] = useState<ResultDialog | null>(null);
   const [message, setMessage] = useState(
     "Upload the monthly HROne extract, or run the 1–980 demonstration.",
@@ -101,8 +104,15 @@ export default function Home() {
 
   const previewRows = useMemo(() => {
     if (!loaded) return [];
-    return loaded.rows.slice(0, 8).map((row, index) => ({
-      line: index + 1,
+    const rowOrder =
+      result.status === "complete" &&
+      result.rowOrder.length === loaded.rows.length
+        ? result.rowOrder
+        : loaded.rows.map((_, index) => index);
+    return rowOrder.slice(0, 8).map((sourceIndex, outputIndex) => {
+      const row = loaded.rows[sourceIndex];
+      return {
+      line: outputIndex + 1,
       postKey: String(row[getColumn(loaded.headers, "POST_KEY") ?? ""] ?? ""),
       postingSide: getPostingSide(
         row[getColumn(loaded.headers, "POST_KEY") ?? ""],
@@ -111,8 +121,9 @@ export default function Home() {
       costCenter: row[getColumn(loaded.headers, "COSTCENTER") ?? ""] ?? "",
       wbs: row[getColumn(loaded.headers, "WBS_ELE") ?? ""] ?? "",
       profitCenter: row[getColumn(loaded.headers, "PROF_CENT") ?? ""] ?? "",
-      counter: result.counters[index] ?? "",
-    }));
+      counter: result.counters[outputIndex] ?? "",
+    };
+    });
   }, [loaded, result]);
 
   function processLoadedFile(next: LoadedFile, nextMaxRows = maxRows) {
@@ -135,7 +146,8 @@ export default function Home() {
   async function readFile(file: File) {
     try {
       setMessage(`Reading ${file.name}…`);
-      const workbook = XLSX.read(await file.arrayBuffer(), {
+      const sourceData = await file.arrayBuffer();
+      const workbook = XLSX.read(sourceData, {
         type: "array",
         cellDates: false,
         cellStyles: true,
@@ -146,7 +158,7 @@ export default function Home() {
       processLoadedFile({
         fileName: file.name,
         sheetName,
-        workbook,
+        sourceData,
         ...parsed,
       });
     } catch (error) {
@@ -189,6 +201,11 @@ export default function Home() {
     ]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, "Demo");
+    const sourceData = XLSX.write(workbook, {
+      type: "array",
+      bookType: "xlsx",
+      cellStyles: true,
+    }) as ArrayBuffer;
 
     processLoadedFile(
       {
@@ -197,7 +214,7 @@ export default function Home() {
         headers,
         rows,
         rowNumbers: rows.map((_, index) => index + 1),
-        workbook,
+        sourceData,
       },
       999,
     );
@@ -206,20 +223,27 @@ export default function Home() {
     );
   }
 
-  function buildCounters() {
+  async function buildCounters() {
     if (!loaded || requiredColumns.length) return;
+    setIsProcessing(true);
+    setDialog(null);
+    setMessage(
+      `Finding exact DR/CR combinations across ${loaded.rows.length.toLocaleString("en-IN")} unique source rows…`,
+    );
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 20));
     const next = runCounterEngine(loaded.rows, loaded.headers, maxRows);
     setResult(next);
+    setIsProcessing(false);
     if (next.status === "complete") {
       setDialog(null);
       setMessage(
-        `${next.batches.length} balanced counter batch${next.batches.length === 1 ? "" : "es"} created.`,
+        `${next.batches.length} balanced counter batch${next.batches.length === 1 ? "" : "es"} created from ${loaded.rows.length.toLocaleString("en-IN")} unique source rows${next.reordered ? " after automatic reordering" : ""}.`,
       );
     } else if (next.status === "blocked") {
-      const startRow = next.blockedAt?.startRow ?? 1;
-      const limitRow = next.blockedAt?.limitRow ?? maxRows;
-      const body = `The file balances overall, but rows ${startRow.toLocaleString("en-IN")}–${limitRow.toLocaleString("en-IN")} contain no point where debit equals credit. No counters were created because every counter must be balanced and contain at most ${maxRows} rows.`;
-      setMessage("No valid balanced cut-off exists inside the current row window.");
+      const body =
+        next.errors[0] ??
+        `The file could not be divided into balanced counters of ${maxRows} rows or fewer without duplicating or splitting a source row.`;
+      setMessage("No exact no-duplication counter combination was found.");
       setDialog({
         title: "Counter creation stopped",
         body,
@@ -255,21 +279,27 @@ export default function Home() {
     }
 
     try {
+      const workbook = XLSX.read(loaded.sourceData.slice(0), {
+        type: "array",
+        cellDates: false,
+        cellStyles: true,
+      });
       appendJournalOutputColumns({
-        workbook: loaded.workbook,
+        workbook,
         sheetName: loaded.sheetName,
         headers: loaded.headers,
         rows: loaded.rows,
         rowNumbers: loaded.rowNumbers,
         counters: result.counters,
+        rowOrder: result.rowOrder,
       });
       XLSX.writeFile(
-        loaded.workbook,
+        workbook,
         `${extensionless(loaded.fileName)}-countered.xlsx`,
         { cellStyles: true },
       );
       setMessage(
-        `Exported ${loaded.rows.length.toLocaleString("en-IN")} original rows with DR/CR and COUNTER BUILDER appended. Existing cells and dates were preserved.`,
+        `Exported ${loaded.rows.length.toLocaleString("en-IN")} unique original rows with DR/CR and COUNTER BUILDER appended. Rows were reordered without duplication; dates and row count were preserved.`,
       );
     } catch (error) {
       setMessage(
@@ -311,8 +341,9 @@ export default function Home() {
           <p className="eyebrow">BALANCED DOCUMENT SPLITTING</p>
           <h2>Build every counter on a true Dr = Cr boundary.</h2>
           <p className="hero-copy">
-            The engine checks up to 999 lines, steps backward to the nearest
-            balanced line, assigns one counter, then repeats from the next row.
+            The engine first uses the nearest balanced boundary. When needed,
+            it automatically combines and reorders original rows so every
+            counter remains balanced and contains no more than 999 lines.
           </p>
         </div>
         <div className="hero-badge">
@@ -328,17 +359,17 @@ export default function Home() {
         <div className="finding-icon">!</div>
         <div>
           <p className="finding-label">COUNTER CONTROL</p>
-          <h3>Every file must pass two balance checks.</h3>
+          <h3>Every original row is used exactly once.</h3>
           <p>
-            First, total debit must equal total credit. Then each counter ends at
-            the latest balanced row within its 999-row window. If either check
-            fails, the file is rejected and no counter output is produced.
+            Total debit must equal total credit. The app then searches the full
+            workbook for exact combinations, reorders those source rows, and
+            verifies that nothing was duplicated, dropped, or split.
           </p>
         </div>
         <div className="finding-metrics">
           <span><b>999</b> maximum rows</span>
           <span><b>DR = CR</b> required</span>
-          <span><b>0</b> partial outputs</span>
+          <span><b>0</b> duplicate rows</span>
         </div>
       </section>
 
@@ -427,21 +458,21 @@ export default function Home() {
             </li>
             <li>
               <span>3</span>
-              <p><b>Step backward</b><small>Choose the latest preceding line where net = 0.</small></p>
+              <p><b>Find exact combinations</b><small>Use original rows from the full workbook only.</small></p>
             </li>
             <li>
               <span>4</span>
-              <p><b>Assign and repeat</b><small>Write COUNTER, then start at the next unassigned row.</small></p>
+              <p><b>Reorder and verify</b><small>Write COUNTER BUILDER after the no-duplication check.</small></p>
             </li>
           </ol>
 
           <button
             className="primary-button"
             type="button"
-            disabled={!loaded || requiredColumns.length > 0}
-            onClick={buildCounters}
+            disabled={!loaded || requiredColumns.length > 0 || isProcessing}
+            onClick={() => void buildCounters()}
           >
-            Build counters
+            {isProcessing ? "Building exact combinations…" : "Build counters"}
             <span>→</span>
           </button>
         </div>
@@ -470,7 +501,7 @@ export default function Home() {
                 {result.status === "complete"
                   ? "Ready to export"
                   : result.status === "blocked"
-                    ? "No valid 999-row cut-off"
+                    ? "Exact combination unavailable"
                     : result.status === "invalid"
                       ? "File rejected"
                       : "Waiting for run"}
@@ -559,14 +590,14 @@ export default function Home() {
 
       <section className="next-rule">
         <div>
-          <p className="kicker">ATTACHED FILE CHECK</p>
-          <h3>The first 999 rows contain debit entries only.</h3>
+          <p className="kicker">AUTOMATIC REORDERING</p>
+          <h3>Original values move together as complete rows.</h3>
         </div>
         <p>
-          JV_Jain.xls is balanced as a complete file, but its first credit line
-          starts after row 2,055. Therefore no balanced cut-off exists at or
-          below row 999. The app correctly stops instead of creating an
-          unbalanced counter or exceeding the 999-row limit.
+          The app never creates a replacement CR entry and never copies an
+          existing line. It reorders complete source rows, preserves every date
+          and field, keeps the original row count, and rejects the result if the
+          source-row identity check is not exact.
         </p>
       </section>
 
