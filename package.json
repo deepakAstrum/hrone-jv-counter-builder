@@ -13,7 +13,8 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "desktop:renderer": "vite build --config desktop/vite.config.ts",
-    "desktop:build": "pnpm run desktop:renderer && electron-builder --projectDir desktop --win nsis portable"
+    "desktop:build": "pnpm run desktop:renderer && electron-builder --projectDir desktop --win nsis portable",
+    "pages:build": "vite build --config desktop/vite.config.ts --outDir ../docs && node scripts/prepare-pages.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

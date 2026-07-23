@@ -27,3 +27,15 @@ pnpm run desktop:build
 ```
 
 Artifacts are written to `outputs/windows`.
+
+## GitHub Pages
+
+The browser application can also be published as a static GitHub Pages site.
+Build the deployable `docs` directory with:
+
+```powershell
+pnpm run pages:build
+```
+
+Pushes that change `docs` on the default branch are deployed automatically by
+the GitHub Pages workflow.
