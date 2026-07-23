@@ -24,6 +24,12 @@ type LoadedFile = {
   workbook: XLSX.WorkBook;
 };
 
+type ResultDialog = {
+  title: string;
+  body: string;
+  tone: "error" | "warning";
+};
+
 const EMPTY_RESULT: CounterResult = {
   status: "idle",
   counters: [],
@@ -81,6 +87,7 @@ export default function Home() {
   const [result, setResult] = useState<CounterResult>(EMPTY_RESULT);
   const [maxRows, setMaxRows] = useState(999);
   const [isDragging, setIsDragging] = useState(false);
+  const [dialog, setDialog] = useState<ResultDialog | null>(null);
   const [message, setMessage] = useState(
     "Upload the monthly HROne extract, or run the 1–980 demonstration.",
   );
@@ -111,6 +118,7 @@ export default function Home() {
   function processLoadedFile(next: LoadedFile, nextMaxRows = maxRows) {
     setLoaded(next);
     setResult(EMPTY_RESULT);
+    setDialog(null);
     const missing = ["POST_KEY", "AMOUNT"].filter(
       (name) => !getColumn(next.headers, name),
     );
@@ -203,22 +211,44 @@ export default function Home() {
     const next = runCounterEngine(loaded.rows, loaded.headers, maxRows);
     setResult(next);
     if (next.status === "complete") {
+      setDialog(null);
       setMessage(
         `${next.batches.length} balanced counter batch${next.batches.length === 1 ? "" : "es"} created.`,
       );
     } else if (next.status === "blocked") {
-      setMessage(
-        "Counter creation stopped: no balanced boundary exists inside the allowed row window.",
-      );
+      const startRow = next.blockedAt?.startRow ?? 1;
+      const limitRow = next.blockedAt?.limitRow ?? maxRows;
+      const body = `The file balances overall, but rows ${startRow.toLocaleString("en-IN")}–${limitRow.toLocaleString("en-IN")} contain no point where debit equals credit. No counters were created because every counter must be balanced and contain at most ${maxRows} rows.`;
+      setMessage("No valid balanced cut-off exists inside the current row window.");
+      setDialog({
+        title: "Counter creation stopped",
+        body,
+        tone: "warning",
+      });
     } else {
-      setMessage("Fix the validation errors before creating counters.");
+      const balanceMismatch =
+        next.errors.some((error) => error.includes("total debit and credit")) &&
+        next.differenceMinor !== 0;
+      const body = balanceMismatch
+        ? `Debit is ${formatAmount(next.debitMinor)} and credit is ${formatAmount(next.creditMinor)}. Difference: ${formatAmount(Math.abs(next.differenceMinor))}. The file was rejected and no counters were created.`
+        : next.errors.join(" ");
+      setMessage(
+        balanceMismatch
+          ? "File rejected: debit and credit totals do not match."
+          : "Fix the validation errors before creating counters.",
+      );
+      setDialog({
+        title: balanceMismatch ? "Debit and credit do not match" : "File rejected",
+        body,
+        tone: "error",
+      });
     }
   }
 
   function exportResult() {
     if (
       !loaded ||
-      !["complete", "blocked"].includes(result.status) ||
+      result.status !== "complete" ||
       result.counters.length !== loaded.rows.length
     ) {
       return;
@@ -252,11 +282,12 @@ export default function Home() {
 
   const balanceOk =
     loaded &&
+    result.status !== "idle" &&
     result.debitMinor === result.creditMinor &&
     result.errors.length === 0;
   const canExport =
     Boolean(loaded) &&
-    ["complete", "blocked"].includes(result.status) &&
+    result.status === "complete" &&
     result.counters.length === loaded?.rows.length;
 
   return (
@@ -296,18 +327,18 @@ export default function Home() {
       <section className="finding-card" aria-label="Workbook finding">
         <div className="finding-icon">!</div>
         <div>
-          <p className="finding-label">JV_Jain.xls finding</p>
-          <h3>The file balances overall, but not within the first 999 rows.</h3>
+          <p className="finding-label">COUNTER CONTROL</p>
+          <h3>Every file must pass two balance checks.</h3>
           <p>
-            7,942 rows · Dr ₹366,823,342.29 · Cr ₹366,823,342.29 · first
-            balanced prefix at row 7,942. Strict sequential countering therefore
-            stops at counter 1 until a grouping or reordering rule is supplied.
+            First, total debit must equal total credit. Then each counter ends at
+            the latest balanced row within its 999-row window. If either check
+            fails, the file is rejected and no counter output is produced.
           </p>
         </div>
         <div className="finding-metrics">
-          <span><b>43</b> profit centres</span>
-          <span><b>206</b> cost centres</span>
-          <span><b>49</b> WBS elements</span>
+          <span><b>999</b> maximum rows</span>
+          <span><b>DR = CR</b> required</span>
+          <span><b>0</b> partial outputs</span>
         </div>
       </section>
 
@@ -426,15 +457,23 @@ export default function Home() {
 
           <div className={`result-state state-${result.status}`}>
             <span className="state-symbol">
-              {result.status === "complete" ? "✓" : result.status === "blocked" ? "!" : "·"}
+              {result.status === "complete"
+                ? "✓"
+                : result.status === "blocked"
+                  ? "!"
+                  : result.status === "invalid"
+                    ? "×"
+                    : "·"}
             </span>
             <div>
               <b>
                 {result.status === "complete"
                   ? "Ready to export"
                   : result.status === "blocked"
-                    ? "Linking rule required"
-                    : "Waiting for run"}
+                    ? "No valid 999-row cut-off"
+                    : result.status === "invalid"
+                      ? "File rejected"
+                      : "Waiting for run"}
               </b>
               <small>{message}</small>
             </div>
@@ -520,18 +559,44 @@ export default function Home() {
 
       <section className="next-rule">
         <div>
-          <p className="kicker">REQUIRED FOR JV_JAIN.XLS</p>
-          <h3>Add one auditable grouping key before automatic reordering.</h3>
+          <p className="kicker">ATTACHED FILE CHECK</p>
+          <h3>The first 999 rows contain debit entries only.</h3>
         </div>
         <p>
-          Debit rows carry COSTCENTER or WBS_ELE, while credit rows carry
-          PROF_CENT. Because the extract has no common linking field, the app
-          must not guess which debits belong to which profit centre. The next
-          stage should load a maintained Cost Center/WBS → Profit Center mapping,
-          form balanced profit-centre blocks, and then pack those blocks into
-          counters of no more than 999 lines.
+          JV_Jain.xls is balanced as a complete file, but its first credit line
+          starts after row 2,055. Therefore no balanced cut-off exists at or
+          below row 999. The app correctly stops instead of creating an
+          unbalanced counter or exceeding the 999-row limit.
         </p>
       </section>
+
+      {dialog && (
+        <div className="dialog-backdrop" role="presentation">
+          <section
+            className={`result-dialog dialog-${dialog.tone}`}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="result-dialog-title"
+          >
+            <span className="dialog-mark" aria-hidden="true">
+              {dialog.tone === "error" ? "×" : "!"}
+            </span>
+            <div>
+              <p className="kicker">COUNTER BUILDER</p>
+              <h3 id="result-dialog-title">{dialog.title}</h3>
+              <p>{dialog.body}</p>
+              <button
+                className="dialog-button"
+                type="button"
+                autoFocus
+                onClick={() => setDialog(null)}
+              >
+                Close
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

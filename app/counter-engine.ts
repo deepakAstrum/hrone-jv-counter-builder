@@ -159,6 +159,22 @@ export function runCounterEngine(
     };
   }
 
+  if (debitMinor !== creditMinor) {
+    return {
+      status: "invalid",
+      counters,
+      batches: [],
+      debitMinor,
+      creditMinor,
+      differenceMinor: debitMinor - creditMinor,
+      warnings,
+      errors: [
+        "File rejected: total debit and credit amounts do not match. No counters were created.",
+      ],
+      blockedAt: null,
+    };
+  }
+
   const prefix = [0];
   signed.forEach((value) => prefix.push(prefix[prefix.length - 1] + value));
 
@@ -214,17 +230,14 @@ export function runCounterEngine(
   }
 
   return {
-    status: debitMinor === creditMinor ? "complete" : "invalid",
+    status: "complete",
     counters,
     batches,
     debitMinor,
     creditMinor,
     differenceMinor: debitMinor - creditMinor,
     warnings,
-    errors:
-      debitMinor === creditMinor
-        ? []
-        : ["The complete file is not balanced; debit and credit totals differ."],
+    errors: [],
     blockedAt: null,
   };
 }

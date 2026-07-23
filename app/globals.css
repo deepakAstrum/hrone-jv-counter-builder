@@ -584,6 +584,16 @@ button:disabled {
   color: #fff;
 }
 
+.state-invalid {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.state-invalid .state-symbol {
+  background: var(--amber);
+  color: #fff;
+}
+
 .result-state b {
   display: block;
   font-size: 12px;
@@ -764,6 +774,64 @@ th:last-child {
   color: #456965;
   font-size: 12px;
   line-height: 1.65;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  padding: 22px;
+  place-items: center;
+  background: rgba(0, 85, 61, 0.58);
+  backdrop-filter: blur(4px);
+}
+
+.result-dialog {
+  display: grid;
+  width: min(100%, 520px);
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  padding: 28px;
+  border: 1px solid #94b9aa;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0, 50, 36, 0.25);
+}
+
+.dialog-mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--amber);
+  color: #fff;
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.result-dialog h3 {
+  margin-top: 4px;
+  font-size: 24px;
+}
+
+.result-dialog > div > p:not(.kicker) {
+  margin: 12px 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dialog-button {
+  width: 130px;
+  padding: 12px 18px;
+  background: var(--teal);
+  color: #fff;
+}
+
+.dialog-button:hover {
+  filter: brightness(0.95);
 }
 
 .sr-only {
