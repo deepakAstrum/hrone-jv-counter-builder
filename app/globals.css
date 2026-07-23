@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #112a2d;
-  --muted: #637579;
-  --line: #dce4e2;
-  --paper: #fbfcf8;
+  --ink: #292929;
+  --muted: #6f7472;
+  --line: #dfe5e2;
+  --paper: #f6f6f6;
   --panel: #ffffff;
-  --teal: #0c6e6b;
-  --teal-dark: #07504f;
-  --teal-soft: #e5f3ef;
-  --lime: #b8d64f;
-  --amber: #d57f25;
-  --amber-soft: #fff4df;
-  --red: #b44e43;
-  --red-soft: #fff0ec;
-  --shadow: 0 20px 55px rgba(24, 55, 56, 0.08);
+  --teal: #00553d;
+  --teal-dark: #003f2e;
+  --teal-mid: #196650;
+  --teal-soft: #e6f2ed;
+  --lime: #ffdc78;
+  --amber: #b47700;
+  --amber-soft: #fff6dc;
+  --red: #8a5b00;
+  --red-soft: #fff3c8;
+  --shadow: 0 18px 48px rgba(0, 85, 61, 0.1);
 }
 
 * {
@@ -28,7 +29,7 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 86% 9%, rgba(184, 214, 79, 0.12), transparent 24rem),
+    linear-gradient(180deg, #ffffff 0, var(--paper) 22rem),
     var(--paper);
   color: var(--ink);
   font-family: Inter, Aptos, "Segoe UI", Arial, sans-serif;
@@ -43,6 +44,12 @@ button {
   color: inherit;
 }
 
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(255, 220, 120, 0.85);
+  outline-offset: 2px;
+}
+
 .app-shell {
   width: min(1480px, calc(100% - 40px));
   margin: 0 auto;
@@ -53,7 +60,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0 24px;
+  padding: 18px 2px 22px;
 }
 
 .brand-mark {
@@ -61,12 +68,13 @@ button {
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 12px;
-  background: var(--ink);
+  border-radius: 6px;
+  background: var(--teal);
   color: #fff;
-  font-size: 13px;
-  font-weight: 850;
-  letter-spacing: -0.02em;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
 
 .brand-copy {
@@ -80,14 +88,14 @@ button {
 
 .brand-copy p {
   color: var(--teal);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 900;
   letter-spacing: 0.08em;
 }
 
 .brand-copy h1 {
   margin-top: 3px;
-  font-size: 20px;
+  font-size: 22px;
   letter-spacing: -0.035em;
 }
 
@@ -96,7 +104,7 @@ button {
   align-items: center;
   gap: 8px;
   margin-left: auto;
-  color: var(--muted);
+  color: var(--teal);
   font-size: 12px;
   font-weight: 700;
 }
@@ -105,8 +113,8 @@ button {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--lime);
-  box-shadow: 0 0 0 4px rgba(184, 214, 79, 0.18);
+  background: var(--teal);
+  box-shadow: 0 0 0 4px rgba(0, 85, 61, 0.1);
 }
 
 .hero {
@@ -116,10 +124,10 @@ button {
   align-items: end;
   padding: 44px 50px 42px;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: 16px;
   background:
-    linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent),
-    var(--ink);
+    radial-gradient(78% 125% at 92% 112%, transparent 0 38%, rgba(25, 102, 80, 0.92) 38.5% 48%, transparent 48.5% 58%, rgba(25, 102, 80, 0.75) 58.5% 68%, transparent 68.5%),
+    var(--teal);
   color: #fff;
   box-shadow: var(--shadow);
 }
@@ -139,17 +147,18 @@ button {
 .hero h2 {
   max-width: 750px;
   margin: 12px 0 14px;
-  font-family: Georgia, "Times New Roman", serif;
+  color: var(--lime);
+  font-family: Inter, Aptos, "Segoe UI", Arial, sans-serif;
   font-size: clamp(40px, 5vw, 68px);
-  font-weight: 500;
-  letter-spacing: -0.055em;
-  line-height: 0.98;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
 }
 
 .hero-copy {
   max-width: 680px;
   margin: 0;
-  color: #bad0cf;
+  color: #d5e7e0;
   font-size: 16px;
   line-height: 1.6;
 }
@@ -161,15 +170,15 @@ button {
   min-width: 230px;
   padding: 22px;
   border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.055);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
 }
 
 .hero-badge span {
   grid-column: 1 / -1;
   margin-bottom: 8px;
-  color: #97afae;
+  color: #bfd4cd;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -197,8 +206,8 @@ button {
   align-items: center;
   margin: 18px 0;
   padding: 20px 24px;
-  border: 1px solid #f0d9b6;
-  border-radius: 18px;
+  border: 1px solid var(--lime);
+  border-radius: 10px;
   background: var(--amber-soft);
 }
 
@@ -208,15 +217,16 @@ button {
   height: 34px;
   place-items: center;
   border-radius: 50%;
-  background: var(--amber);
-  color: #fff;
+  border-radius: 6px;
+  background: var(--teal);
+  color: var(--lime);
   font-family: Georgia, serif;
   font-weight: 800;
 }
 
 .finding-label {
   margin: 0 0 4px;
-  color: var(--amber);
+  color: var(--teal);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: 0.14em;
@@ -234,7 +244,7 @@ button {
 
 .finding-card h3 + p {
   margin-top: 5px;
-  color: #74644f;
+  color: #6b624b;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -247,9 +257,9 @@ button {
 .finding-metrics span {
   min-width: 88px;
   padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.65);
-  color: #7c6b50;
+  border-radius: 6px;
+  background: #fff;
+  color: #6d6551;
   font-size: 10px;
   text-align: center;
 }
@@ -270,7 +280,7 @@ button {
 .data-panel,
 .next-rule {
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 12px;
   background: var(--panel);
   box-shadow: 0 12px 36px rgba(25, 57, 58, 0.045);
 }
@@ -292,10 +302,10 @@ button {
   width: 35px;
   height: 35px;
   place-items: center;
-  border-radius: 10px;
-  background: var(--teal-soft);
-  color: var(--teal);
-  font-family: Georgia, serif;
+  border-radius: 4px;
+  background: var(--teal);
+  color: var(--lime);
+  font-family: Inter, Aptos, "Segoe UI", Arial, sans-serif;
   font-size: 13px;
   font-weight: 800;
 }
@@ -320,9 +330,9 @@ button {
   place-items: center;
   align-content: center;
   padding: 24px;
-  border: 1.5px dashed #a9bfba;
-  border-radius: 16px;
-  background: #f7faf8;
+  border: 1.5px dashed #7da99a;
+  border-radius: 8px;
+  background: #fafafa;
   transition: 160ms ease;
 }
 
@@ -339,9 +349,9 @@ button {
   height: 42px;
   margin-bottom: 14px;
   place-items: center;
-  border-radius: 13px;
-  background: var(--ink);
-  color: #fff;
+  border-radius: 5px;
+  background: var(--teal);
+  color: var(--lime);
   font-size: 22px;
 }
 
@@ -384,7 +394,7 @@ button {
   gap: 10px;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 6px;
 }
 
 .map-side {
@@ -393,7 +403,7 @@ button {
   height: 34px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 9px;
+  border-radius: 4px;
   font-size: 10px;
   font-weight: 900;
 }
@@ -431,8 +441,8 @@ button {
   justify-content: space-between;
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fafbf8;
+  border-radius: 6px;
+  background: #f6f6f6;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -442,7 +452,7 @@ button {
   width: 78px;
   padding: 8px 10px;
   border: 1px solid #b8c9c5;
-  border-radius: 9px;
+  border-radius: 4px;
   background: #fff;
   color: var(--ink);
   font-weight: 850;
@@ -481,7 +491,7 @@ button {
   width: 28px;
   height: 28px;
   place-items: center;
-  border: 1px solid #b7cbc6;
+  border: 1px solid var(--teal);
   border-radius: 50%;
   background: #fff;
   color: var(--teal);
@@ -513,7 +523,7 @@ button {
   width: 100%;
   cursor: pointer;
   border: 0;
-  border-radius: 12px;
+  border-radius: 5px;
   font-size: 12px;
   font-weight: 850;
   transition: 160ms ease;
@@ -531,7 +541,7 @@ button {
 .primary-button:hover:not(:disabled),
 .export-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  filter: brightness(0.95);
+  background: var(--teal-dark);
 }
 
 button:disabled {
@@ -546,7 +556,7 @@ button:disabled {
   align-items: center;
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 13px;
+  border-radius: 7px;
   background: #fafbf9;
 }
 
@@ -557,14 +567,14 @@ button:disabled {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  background: #e9efed;
+  background: #e7ece9;
   color: var(--muted);
   font-weight: 900;
 }
 
 .state-complete {
-  border-color: #b8dacb;
-  background: #f0faf5;
+  border-color: #94b9aa;
+  background: var(--teal-soft);
 }
 
 .state-complete .state-symbol {
@@ -573,7 +583,7 @@ button:disabled {
 }
 
 .state-blocked {
-  border-color: #efcf9f;
+  border-color: var(--lime);
   background: var(--amber-soft);
 }
 
@@ -605,7 +615,7 @@ button:disabled {
 .totals-grid > div {
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 11px;
+  border-radius: 6px;
   background: #fff;
 }
 
@@ -626,8 +636,8 @@ button:disabled {
 }
 
 .totals-grid .balanced {
-  border-color: #b8dacb;
-  background: #f0faf5;
+  border-color: #94b9aa;
+  background: var(--teal-soft);
 }
 
 .totals-grid .balanced b {
@@ -646,7 +656,7 @@ button:disabled {
 
 .export-button {
   padding: 14px;
-  background: var(--ink);
+  background: var(--teal);
   color: #fff;
 }
 
@@ -691,8 +701,8 @@ td {
 }
 
 th {
-  background: #f3f7f5;
-  color: var(--muted);
+  background: var(--teal);
+  color: #fff;
   font-size: 9px;
   font-weight: 850;
   letter-spacing: 0.08em;
@@ -714,7 +724,7 @@ th:last-child {
   min-width: 31px;
   height: 22px;
   place-items: center;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 9px;
   font-weight: 900;
 }
@@ -750,8 +760,11 @@ th:last-child {
   gap: 40px;
   margin-top: 18px;
   padding: 26px;
-  border-color: #bad3ce;
-  background: var(--teal-soft);
+  border-color: var(--teal);
+  background:
+    radial-gradient(75% 150% at 100% 100%, transparent 0 45%, rgba(25, 102, 80, 0.95) 45.5% 57%, transparent 57.5%),
+    var(--teal);
+  color: #fff;
 }
 
 .next-rule p {
@@ -759,9 +772,14 @@ th:last-child {
 }
 
 .next-rule > p {
-  color: #456965;
+  color: #d5e7e0;
   font-size: 12px;
   line-height: 1.65;
+}
+
+.next-rule .kicker,
+.next-rule h3 {
+  color: var(--lime);
 }
 
 .sr-only {
