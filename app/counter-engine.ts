@@ -24,6 +24,15 @@ export type CounterResult = {
 const DEBIT_KEYS = new Set(["40", "29"]);
 const CREDIT_KEYS = new Set(["50", "34", "39"]);
 
+export function getPostingSide(value: unknown): "DR" | "CR" | "" {
+  const postingKey = String(value ?? "").trim();
+
+  if (DEBIT_KEYS.has(postingKey)) return "DR";
+  if (CREDIT_KEYS.has(postingKey)) return "CR";
+
+  return "";
+}
+
 export function normaliseColumnName(value: string) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 }

@@ -6,11 +6,12 @@ import {
   buildDemoRows,
   formatAmount,
   getColumn,
-  normaliseColumnName,
+  getPostingSide,
   runCounterEngine,
   type CounterResult,
   type JournalRow,
 } from "./counter-engine";
+import { appendJournalOutputColumns } from "./workbook-output";
 
 type CellValue = string | number | boolean | Date | null | undefined;
 
@@ -19,6 +20,8 @@ type LoadedFile = {
   sheetName: string;
   headers: string[];
   rows: JournalRow[];
+  rowNumbers: number[];
+  workbook: XLSX.WorkBook;
 };
 
 const EMPTY_RESULT: CounterResult = {
@@ -37,7 +40,9 @@ function extensionless(fileName: string) {
   return fileName.replace(/\.[^.]+$/, "");
 }
 
-function rowsFromSheet(sheet: XLSX.WorkSheet): Pick<LoadedFile, "headers" | "rows"> {
+function rowsFromSheet(
+  sheet: XLSX.WorkSheet,
+): Pick<LoadedFile, "headers" | "rows" | "rowNumbers"> {
   const matrix = XLSX.utils.sheet_to_json<CellValue[]>(sheet, {
     header: 1,
     defval: "",
@@ -53,18 +58,21 @@ function rowsFromSheet(sheet: XLSX.WorkSheet): Pick<LoadedFile, "headers" | "row
     return label || `COLUMN_${index + 1}`;
   });
 
-  const rows = matrix
-    .slice(1)
-    .filter((row) => row.some((value) => String(value ?? "").trim() !== ""))
-    .map((values) => {
-      const row: JournalRow = {};
-      headers.forEach((header, index) => {
-        row[header] = values[index] ?? "";
-      });
-      return row;
-    });
+  const rows: JournalRow[] = [];
+  const rowNumbers: number[] = [];
 
-  return { headers, rows };
+  matrix.slice(1).forEach((values, index) => {
+    if (!values.some((value) => String(value ?? "").trim() !== "")) return;
+
+    const row: JournalRow = {};
+    headers.forEach((header, columnIndex) => {
+      row[header] = values[columnIndex] ?? "";
+    });
+    rows.push(row);
+    rowNumbers.push(index + 1);
+  });
+
+  return { headers, rows, rowNumbers };
 }
 
 export default function Home() {
@@ -89,6 +97,9 @@ export default function Home() {
     return loaded.rows.slice(0, 8).map((row, index) => ({
       line: index + 1,
       postKey: String(row[getColumn(loaded.headers, "POST_KEY") ?? ""] ?? ""),
+      postingSide: getPostingSide(
+        row[getColumn(loaded.headers, "POST_KEY") ?? ""],
+      ),
       amount: row[getColumn(loaded.headers, "AMOUNT") ?? ""] ?? "",
       costCenter: row[getColumn(loaded.headers, "COSTCENTER") ?? ""] ?? "",
       wbs: row[getColumn(loaded.headers, "WBS_ELE") ?? ""] ?? "",
@@ -118,7 +129,8 @@ export default function Home() {
       setMessage(`Reading ${file.name}…`);
       const workbook = XLSX.read(await file.arrayBuffer(), {
         type: "array",
-        cellDates: true,
+        cellDates: false,
+        cellStyles: true,
       });
       const sheetName = workbook.SheetNames[0];
       if (!sheetName) throw new Error("No worksheet was found.");
@@ -126,6 +138,7 @@ export default function Home() {
       processLoadedFile({
         fileName: file.name,
         sheetName,
+        workbook,
         ...parsed,
       });
     } catch (error) {
@@ -153,20 +166,30 @@ export default function Home() {
 
   function loadDemo() {
     const rows = buildDemoRows();
+    const headers = [
+      "DOC_DATE",
+      "POST_KEY",
+      "AMOUNT",
+      "COSTCENTER",
+      "PROF_CENT",
+      "WBS_ELE",
+      "COUNTER",
+    ];
+    const sheet = XLSX.utils.aoa_to_sheet([
+      headers,
+      ...rows.map((row) => headers.map((header) => row[header] ?? "")),
+    ]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Demo");
+
     processLoadedFile(
       {
         fileName: "balanced-boundary-demo.xlsx",
         sheetName: "Demo",
-        headers: [
-          "DOC_DATE",
-          "POST_KEY",
-          "AMOUNT",
-          "COSTCENTER",
-          "PROF_CENT",
-          "WBS_ELE",
-          "COUNTER",
-        ],
+        headers,
         rows,
+        rowNumbers: rows.map((_, index) => index + 1),
+        workbook,
       },
       999,
     );
@@ -193,35 +216,48 @@ export default function Home() {
   }
 
   function exportResult() {
-    if (!loaded || result.status !== "complete") return;
-    const counterHeader = getColumn(loaded.headers, "COUNTER");
-    const exportHeaders = loaded.headers.filter(
-      (header) => normaliseColumnName(header) !== "COUNTER",
-    );
-    exportHeaders.push(counterHeader || "COUNTER");
+    if (
+      !loaded ||
+      !["complete", "blocked"].includes(result.status) ||
+      result.counters.length !== loaded.rows.length
+    ) {
+      return;
+    }
 
-    const matrix: CellValue[][] = [
-      exportHeaders,
-      ...loaded.rows.map((row, index) =>
-        exportHeaders.map((header) =>
-          normaliseColumnName(header) === "COUNTER"
-            ? result.counters[index]
-            : row[header] ?? "",
-        ),
-      ),
-    ];
-
-    const sheet = XLSX.utils.aoa_to_sheet(matrix);
-    sheet["!autofilter"] = { ref: `A1:${XLSX.utils.encode_col(exportHeaders.length - 1)}1` };
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, sheet, loaded.sheetName.slice(0, 31));
-    XLSX.writeFile(workbook, `${extensionless(loaded.fileName)}-countered.xlsx`);
+    try {
+      appendJournalOutputColumns({
+        workbook: loaded.workbook,
+        sheetName: loaded.sheetName,
+        headers: loaded.headers,
+        rows: loaded.rows,
+        rowNumbers: loaded.rowNumbers,
+        counters: result.counters,
+      });
+      XLSX.writeFile(
+        loaded.workbook,
+        `${extensionless(loaded.fileName)}-countered.xlsx`,
+        { cellStyles: true },
+      );
+      setMessage(
+        `Exported ${loaded.rows.length.toLocaleString("en-IN")} original rows with DR/CR and COUNTER BUILDER appended. Existing cells and dates were preserved.`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The reviewed workbook could not be exported.",
+      );
+    }
   }
 
   const balanceOk =
     loaded &&
     result.debitMinor === result.creditMinor &&
     result.errors.length === 0;
+  const canExport =
+    Boolean(loaded) &&
+    ["complete", "blocked"].includes(result.status) &&
+    result.counters.length === loaded?.rows.length;
 
   return (
     <main className="app-shell">
@@ -426,10 +462,10 @@ export default function Home() {
           <button
             className="export-button"
             type="button"
-            disabled={result.status !== "complete"}
+            disabled={!canExport}
             onClick={exportResult}
           >
-            Export countered workbook
+            Export reviewed workbook
           </button>
         </div>
       </section>
@@ -438,7 +474,7 @@ export default function Home() {
         <div className="data-heading">
           <div>
             <p className="kicker">AUDIT PREVIEW</p>
-            <h3>First rows and assigned counter</h3>
+            <h3>First rows and appended output columns</h3>
           </div>
           <p>{message}</p>
         </div>
@@ -450,11 +486,12 @@ export default function Home() {
                 <tr>
                   <th>Line</th>
                   <th>Post key</th>
+                  <th>DR/CR</th>
                   <th>Amount</th>
                   <th>Cost center</th>
                   <th>WBS element</th>
                   <th>Profit center</th>
-                  <th>Counter</th>
+                  <th>Counter Builder</th>
                 </tr>
               </thead>
               <tbody>
@@ -462,6 +499,7 @@ export default function Home() {
                   <tr key={row.line}>
                     <td>{row.line}</td>
                     <td><span className={`key-pill ${["40", "29"].includes(row.postKey) ? "dr" : "cr"}`}>{row.postKey}</span></td>
+                    <td><b>{row.postingSide || "—"}</b></td>
                     <td>{String(row.amount)}</td>
                     <td>{String(row.costCenter) || "—"}</td>
                     <td>{String(row.wbs) || "—"}</td>
