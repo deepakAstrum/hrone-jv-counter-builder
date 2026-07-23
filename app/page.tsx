@@ -227,7 +227,7 @@ export default function Home() {
     <main className="app-shell">
       <header className="topbar">
         <div className="brand-mark" aria-hidden="true">
-          HR
+          CB
         </div>
         <div className="brand-copy">
           <p>HROne → SAP</p>

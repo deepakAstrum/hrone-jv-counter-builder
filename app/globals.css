@@ -15,7 +15,7 @@
   --amber-soft: #fff6dc;
   --red: #8a5b00;
   --red-soft: #fff3c8;
-  --shadow: 0 18px 48px rgba(0, 85, 61, 0.1);
+  --shadow: 0 20px 55px rgba(0, 85, 61, 0.1);
 }
 
 * {
@@ -29,7 +29,7 @@ html {
 body {
   margin: 0;
   background:
-    linear-gradient(180deg, #ffffff 0, var(--paper) 22rem),
+    radial-gradient(circle at 86% 9%, rgba(255, 220, 120, 0.18), transparent 24rem),
     var(--paper);
   color: var(--ink);
   font-family: Inter, Aptos, "Segoe UI", Arial, sans-serif;
@@ -44,12 +44,6 @@ button {
   color: inherit;
 }
 
-button:focus-visible,
-input:focus-visible {
-  outline: 3px solid rgba(255, 220, 120, 0.85);
-  outline-offset: 2px;
-}
-
 .app-shell {
   width: min(1480px, calc(100% - 40px));
   margin: 0 auto;
@@ -60,7 +54,7 @@ input:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 2px 22px;
+  padding: 10px 0 24px;
 }
 
 .brand-mark {
@@ -68,13 +62,12 @@ input:focus-visible {
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 6px;
+  border-radius: 12px;
   background: var(--teal);
   color: #fff;
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: -0.06em;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
 }
 
 .brand-copy {
@@ -88,14 +81,14 @@ input:focus-visible {
 
 .brand-copy p {
   color: var(--teal);
-  font-size: 12px;
-  font-weight: 900;
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: 0.08em;
 }
 
 .brand-copy h1 {
   margin-top: 3px;
-  font-size: 22px;
+  font-size: 20px;
   letter-spacing: -0.035em;
 }
 
@@ -113,8 +106,8 @@ input:focus-visible {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--teal);
-  box-shadow: 0 0 0 4px rgba(0, 85, 61, 0.1);
+  background: var(--lime);
+  box-shadow: 0 0 0 4px rgba(255, 220, 120, 0.24);
 }
 
 .hero {
@@ -124,9 +117,9 @@ input:focus-visible {
   align-items: end;
   padding: 44px 50px 42px;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 24px;
   background:
-    radial-gradient(78% 125% at 92% 112%, transparent 0 38%, rgba(25, 102, 80, 0.92) 38.5% 48%, transparent 48.5% 58%, rgba(25, 102, 80, 0.75) 58.5% 68%, transparent 68.5%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent),
     var(--teal);
   color: #fff;
   box-shadow: var(--shadow);
@@ -148,11 +141,11 @@ input:focus-visible {
   max-width: 750px;
   margin: 12px 0 14px;
   color: var(--lime);
-  font-family: Inter, Aptos, "Segoe UI", Arial, sans-serif;
+  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(40px, 5vw, 68px);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 1.02;
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
 }
 
 .hero-copy {
@@ -170,8 +163,8 @@ input:focus-visible {
   min-width: 230px;
   padding: 22px;
   border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
   backdrop-filter: blur(10px);
 }
 
@@ -207,7 +200,7 @@ input:focus-visible {
   margin: 18px 0;
   padding: 20px 24px;
   border: 1px solid var(--lime);
-  border-radius: 10px;
+  border-radius: 18px;
   background: var(--amber-soft);
 }
 
@@ -217,7 +210,6 @@ input:focus-visible {
   height: 34px;
   place-items: center;
   border-radius: 50%;
-  border-radius: 6px;
   background: var(--teal);
   color: var(--lime);
   font-family: Georgia, serif;
@@ -257,8 +249,8 @@ input:focus-visible {
 .finding-metrics span {
   min-width: 88px;
   padding: 10px 12px;
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.65);
   color: #6d6551;
   font-size: 10px;
   text-align: center;
@@ -280,7 +272,7 @@ input:focus-visible {
 .data-panel,
 .next-rule {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 20px;
   background: var(--panel);
   box-shadow: 0 12px 36px rgba(25, 57, 58, 0.045);
 }
@@ -302,10 +294,10 @@ input:focus-visible {
   width: 35px;
   height: 35px;
   place-items: center;
-  border-radius: 4px;
+  border-radius: 10px;
   background: var(--teal);
   color: var(--lime);
-  font-family: Inter, Aptos, "Segoe UI", Arial, sans-serif;
+  font-family: Georgia, serif;
   font-size: 13px;
   font-weight: 800;
 }
@@ -331,7 +323,7 @@ input:focus-visible {
   align-content: center;
   padding: 24px;
   border: 1.5px dashed #7da99a;
-  border-radius: 8px;
+  border-radius: 16px;
   background: #fafafa;
   transition: 160ms ease;
 }
@@ -349,7 +341,7 @@ input:focus-visible {
   height: 42px;
   margin-bottom: 14px;
   place-items: center;
-  border-radius: 5px;
+  border-radius: 13px;
   background: var(--teal);
   color: var(--lime);
   font-size: 22px;
@@ -394,7 +386,7 @@ input:focus-visible {
   gap: 10px;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 12px;
 }
 
 .map-side {
@@ -403,7 +395,7 @@ input:focus-visible {
   height: 34px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 4px;
+  border-radius: 9px;
   font-size: 10px;
   font-weight: 900;
 }
@@ -441,7 +433,7 @@ input:focus-visible {
   justify-content: space-between;
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 12px;
   background: #f6f6f6;
   color: var(--muted);
   font-size: 12px;
@@ -452,7 +444,7 @@ input:focus-visible {
   width: 78px;
   padding: 8px 10px;
   border: 1px solid #b8c9c5;
-  border-radius: 4px;
+  border-radius: 9px;
   background: #fff;
   color: var(--ink);
   font-weight: 850;
@@ -523,7 +515,7 @@ input:focus-visible {
   width: 100%;
   cursor: pointer;
   border: 0;
-  border-radius: 5px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 850;
   transition: 160ms ease;
@@ -541,7 +533,7 @@ input:focus-visible {
 .primary-button:hover:not(:disabled),
 .export-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: var(--teal-dark);
+  filter: brightness(0.95);
 }
 
 button:disabled {
@@ -556,7 +548,7 @@ button:disabled {
   align-items: center;
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: 13px;
   background: #fafbf9;
 }
 
@@ -615,7 +607,7 @@ button:disabled {
 .totals-grid > div {
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 11px;
   background: #fff;
 }
 
@@ -724,7 +716,7 @@ th:last-child {
   min-width: 31px;
   height: 22px;
   place-items: center;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 9px;
   font-weight: 900;
 }
@@ -761,10 +753,7 @@ th:last-child {
   margin-top: 18px;
   padding: 26px;
   border-color: var(--teal);
-  background:
-    radial-gradient(75% 150% at 100% 100%, transparent 0 45%, rgba(25, 102, 80, 0.95) 45.5% 57%, transparent 57.5%),
-    var(--teal);
-  color: #fff;
+  background: var(--teal-soft);
 }
 
 .next-rule p {
@@ -772,14 +761,9 @@ th:last-child {
 }
 
 .next-rule > p {
-  color: #d5e7e0;
+  color: #456965;
   font-size: 12px;
   line-height: 1.65;
-}
-
-.next-rule .kicker,
-.next-rule h3 {
-  color: var(--lime);
 }
 
 .sr-only {
