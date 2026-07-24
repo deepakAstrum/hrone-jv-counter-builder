@@ -12,7 +12,7 @@ Every original row must be used exactly once.
 
 The app accepts `.xls`, `.xlsx`, and `.csv`, processes the file locally, and
 exports an `.xlsx` that preserves the source values, dates, and row count while
-appending `DR/CR` and `COUNTER BUILDER`.
+appending `DR/CR` and filling the required blank `COUNTER` input column.
 
 ## Windows desktop build
 

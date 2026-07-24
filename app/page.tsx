@@ -11,7 +11,10 @@ import {
   type CounterResult,
   type JournalRow,
 } from "./counter-engine";
-import { appendJournalOutputColumns } from "./workbook-output";
+import {
+  appendJournalOutputColumns,
+  getCounterInputIssue,
+} from "./workbook-output";
 
 type CellValue = string | number | boolean | Date | null | undefined;
 
@@ -102,6 +105,16 @@ export default function Home() {
     );
   }, [loaded]);
 
+  const counterInputIssue = useMemo(
+    () =>
+      loaded
+        ? getCounterInputIssue(loaded.headers, loaded.rows)
+        : null,
+    [loaded],
+  );
+  const hasInputValidationError =
+    requiredColumns.length > 0 || Boolean(counterInputIssue);
+
   const previewRows = useMemo(() => {
     if (!loaded) return [];
     const rowOrder =
@@ -135,6 +148,24 @@ export default function Home() {
     );
     if (missing.length) {
       setMessage(`Missing required column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}.`);
+      setDialog({
+        title: "Required column missing",
+        body: `Missing required column${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}.`,
+        tone: "error",
+      });
+      return;
+    }
+    const nextCounterIssue = getCounterInputIssue(next.headers, next.rows);
+    if (nextCounterIssue) {
+      setMessage(nextCounterIssue.message);
+      setDialog({
+        title:
+          nextCounterIssue.kind === "missing"
+            ? "COUNTER column missing"
+            : "COUNTER must be blank",
+        body: nextCounterIssue.message,
+        tone: "error",
+      });
       return;
     }
     setMessage(
@@ -224,7 +255,26 @@ export default function Home() {
   }
 
   async function buildCounters() {
-    if (!loaded || requiredColumns.length) return;
+    if (!loaded) return;
+    if (requiredColumns.length) {
+      setDialog({
+        title: "Required column missing",
+        body: `Missing required column${requiredColumns.length > 1 ? "s" : ""}: ${requiredColumns.join(", ")}.`,
+        tone: "error",
+      });
+      return;
+    }
+    if (counterInputIssue) {
+      setDialog({
+        title:
+          counterInputIssue.kind === "missing"
+            ? "COUNTER column missing"
+            : "COUNTER must be blank",
+        body: counterInputIssue.message,
+        tone: "error",
+      });
+      return;
+    }
     setIsProcessing(true);
     setDialog(null);
     setMessage(
@@ -299,7 +349,7 @@ export default function Home() {
         { cellStyles: true },
       );
       setMessage(
-        `Exported ${loaded.rows.length.toLocaleString("en-IN")} unique original rows with DR/CR and COUNTER BUILDER appended. Rows were reordered without duplication; dates and row count were preserved.`,
+        `Exported ${loaded.rows.length.toLocaleString("en-IN")} unique original rows with DR/CR appended and the existing COUNTER column populated. Rows were reordered without duplication; dates and row count were preserved.`,
       );
     } catch (error) {
       setMessage(
@@ -324,7 +374,9 @@ export default function Home() {
     <main className="app-shell">
       <header className="topbar">
         <div className="brand-mark" aria-hidden="true">
-          CB
+          {/* Shared by the Next.js site and Vite desktop build. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="brand-logo" src="./hrone-logo.png" alt="" />
         </div>
         <div className="brand-copy">
           <p>HROne → SAP</p>
@@ -462,14 +514,14 @@ export default function Home() {
             </li>
             <li>
               <span>4</span>
-              <p><b>Reorder and verify</b><small>Write COUNTER BUILDER after the no-duplication check.</small></p>
+              <p><b>Reorder and verify</b><small>Populate COUNTER after the no-duplication check.</small></p>
             </li>
           </ol>
 
           <button
             className="primary-button"
             type="button"
-            disabled={!loaded || requiredColumns.length > 0 || isProcessing}
+            disabled={!loaded || hasInputValidationError || isProcessing}
             onClick={() => void buildCounters()}
           >
             {isProcessing ? "Building exact combinations…" : "Build counters"}
@@ -561,7 +613,7 @@ export default function Home() {
                   <th>Cost center</th>
                   <th>WBS element</th>
                   <th>Profit center</th>
-                  <th>Counter Builder</th>
+                  <th>Counter</th>
                 </tr>
               </thead>
               <tbody>
