@@ -415,11 +415,10 @@ export default function Home() {
         <div className="finding-icon">!</div>
         <div>
           <p className="finding-label">COUNTER CONTROL</p>
-          <h3>Every original row is used exactly once.</h3>
-          <p>
-            Total debit must equal total credit. The app then searches the full
-            workbook for exact combinations, reorders those source rows, and
-            verifies that nothing was duplicated, dropped, or split.
+          <p className="finding-copy">
+            This app extracts matching combinations across the workbook,
+            reorders those rows, and validates the result - ensuring debit
+            equals credit with no duplication or splitting.
           </p>
         </div>
         <div className="finding-metrics">
