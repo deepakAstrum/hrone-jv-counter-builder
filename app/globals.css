@@ -54,7 +54,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0 24px;
+  padding: 10px 0 18px;
 }
 
 .brand-mark {
@@ -122,9 +122,9 @@ button {
 .hero {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 40px;
+  gap: 34px;
   align-items: end;
-  padding: 24px 50px;
+  padding: 20px 50px;
   overflow: hidden;
   border-radius: 24px;
   background:
@@ -161,8 +161,8 @@ button {
   max-width: 680px;
   margin: 0;
   color: #d5e7e0;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .hero-badge {
@@ -170,7 +170,7 @@ button {
   grid-template-columns: auto auto;
   gap: 5px 24px;
   min-width: 230px;
-  padding: 22px;
+  padding: 18px;
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.055);
@@ -204,10 +204,10 @@ button {
 .finding-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 14px;
   align-items: center;
-  margin: 18px 0;
-  padding: 20px 24px;
+  margin: 14px 0;
+  padding: 16px 20px;
   border: 1px solid var(--lime);
   border-radius: 18px;
   background: var(--amber-soft);
@@ -257,7 +257,7 @@ button {
 
 .finding-metrics span {
   min-width: 88px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.65);
   color: #6d6551;
@@ -274,7 +274,7 @@ button {
 .workspace-grid {
   display: grid;
   grid-template-columns: 1.08fr 0.95fr 1fr;
-  gap: 18px;
+  gap: 14px;
 }
 
 .panel,
@@ -287,15 +287,15 @@ button {
 }
 
 .panel {
-  min-height: 470px;
-  padding: 24px;
+  min-height: 440px;
+  padding: 20px;
 }
 
 .panel-heading {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 
 .step-number {
@@ -326,11 +326,11 @@ button {
 .drop-zone {
   display: grid;
   width: 100%;
-  min-height: 190px;
+  min-height: 170px;
   cursor: pointer;
   place-items: center;
   align-content: center;
-  padding: 24px;
+  padding: 20px;
   border: 1.5px dashed #7da99a;
   border-radius: 16px;
   background: #fafafa;
@@ -348,7 +348,7 @@ button {
   display: grid;
   width: 42px;
   height: 42px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   place-items: center;
   border-radius: 13px;
   background: var(--teal);
@@ -372,7 +372,7 @@ button {
 
 .text-button {
   display: block;
-  margin: 14px auto 20px;
+  margin: 10px auto 14px;
   cursor: pointer;
   border: 0;
   background: transparent;
@@ -393,7 +393,7 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 12px;
 }
@@ -440,7 +440,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #f6f6f6;
@@ -463,7 +463,7 @@ button {
 .rule-list {
   display: grid;
   gap: 0;
-  margin: 18px 0 20px;
+  margin: 14px 0 16px;
   padding: 0;
   list-style: none;
 }
@@ -473,7 +473,7 @@ button {
   display: grid;
   grid-template-columns: 28px 1fr;
   gap: 11px;
-  min-height: 62px;
+  min-height: 56px;
 }
 
 .rule-list li:not(:last-child)::after {
@@ -534,7 +534,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 12px 16px;
   background: var(--teal);
   color: #fff;
 }
@@ -553,9 +553,9 @@ button:disabled {
 .result-state {
   display: flex;
   gap: 11px;
-  min-height: 72px;
+  min-height: 64px;
   align-items: center;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 13px;
   background: #fafbf9;
@@ -620,11 +620,11 @@ button:disabled {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 9px;
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
 .totals-grid > div {
-  padding: 12px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 11px;
   background: #fff;
@@ -656,8 +656,8 @@ button:disabled {
 }
 
 .blocker-note {
-  margin-bottom: 14px;
-  padding: 10px 12px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
   border-left: 3px solid var(--amber);
   background: var(--amber-soft);
   color: #725e42;
@@ -666,13 +666,13 @@ button:disabled {
 }
 
 .export-button {
-  padding: 14px;
+  padding: 12px;
   background: var(--teal);
   color: #fff;
 }
 
 .data-panel {
-  margin-top: 18px;
+  margin-top: 14px;
   overflow: hidden;
 }
 
@@ -680,8 +680,8 @@ button:disabled {
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 20px;
-  padding: 22px 24px 18px;
+  gap: 16px;
+  padding: 18px 20px 16px;
 }
 
 .data-heading > p {
@@ -705,7 +705,7 @@ table {
 
 th,
 td {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid #edf1ef;
   text-align: left;
   white-space: nowrap;
@@ -752,7 +752,7 @@ th:last-child {
 
 .empty-table {
   display: flex;
-  min-height: 150px;
+  min-height: 130px;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -768,9 +768,9 @@ th:last-child {
 .next-rule {
   display: grid;
   grid-template-columns: minmax(250px, 0.65fr) 1.35fr;
-  gap: 40px;
-  margin-top: 18px;
-  padding: 26px;
+  gap: 32px;
+  margin-top: 14px;
+  padding: 20px;
   border-color: var(--teal);
   background: var(--teal-soft);
 }
@@ -885,7 +885,7 @@ th:last-child {
 
   .hero {
     grid-template-columns: 1fr;
-    padding: 24px;
+    padding: 20px;
   }
 
   .hero h2 {
