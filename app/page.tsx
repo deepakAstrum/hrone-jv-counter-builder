@@ -391,11 +391,15 @@ export default function Home() {
       <section className="hero">
         <div>
           <p className="eyebrow">BALANCED DOCUMENT SPLITTING</p>
-          <h2>Build every counter on a true Dr = Cr boundary.</h2>
+          <h2>
+            Build counter to make journal data into ERP ready vouchers
+            automatically.
+          </h2>
           <p className="hero-copy">
-            The engine first uses the nearest balanced boundary. When needed,
-            it automatically combines and reorders original rows so every
-            counter remains balanced and contains no more than 999 lines.
+            The intelligent app engine first uses the nearest balanced boundary.
+            When needed, it automatically combines and reorders original rows
+            so every counter remains balanced and contains no more than 999
+            lines.
           </p>
         </div>
         <div className="hero-badge">
@@ -646,10 +650,9 @@ export default function Home() {
           <h3>Original values move together as complete rows.</h3>
         </div>
         <p>
-          The app never creates a replacement CR entry and never copies an
-          existing line. It reorders complete source rows, preserves every date
-          and field, keeps the original row count, and rejects the result if the
-          source-row identity check is not exact.
+          The app reorders complete source rows, preserves every date and field,
+          keeps the original row count, and rejects the result if the source-row
+          identity check is not exact.
         </p>
       </section>
 
