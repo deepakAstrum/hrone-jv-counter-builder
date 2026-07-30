@@ -41,6 +41,9 @@ const DEBIT_KEYS = new Set(["40", "29"]);
 const CREDIT_KEYS = new Set(["50", "34", "39"]);
 const RANDOM_TRIALS = 120_000;
 const RANDOM_ATTEMPTS = 20;
+// Once the remaining overflow is within the search's practical dense-subset
+// range, require the next balanced group to leave a legal final counter.
+const FINAL_FIT_OVERFLOW_RATIO = 0.75;
 
 export function getPostingSide(value: unknown): PostingSide | "" {
   const postingKey = String(value ?? "").trim();
@@ -144,6 +147,7 @@ function findBalancedSubset(
   debitCandidates: PreparedEntry[],
   creditCandidates: PreparedEntry[],
   maxRows: number,
+  minRows: number,
   seed: number,
   debitProbability: number,
   creditProbability: number,
@@ -204,7 +208,10 @@ function findBalancedSubset(
     if (creditCount > 0 && encodedDebitState !== undefined) {
       const debitTrial = Math.floor(encodedDebitState / 1_000);
       const matchedDebitCount = encodedDebitState % 1_000;
-      if (creditCount + matchedDebitCount <= maxRows) {
+      if (
+        creditCount + matchedDebitCount >= minRows &&
+        creditCount + matchedDebitCount <= maxRows
+      ) {
         const debit = walkToTrial(
           debitCandidates,
           debitSeed,
@@ -315,6 +322,17 @@ function packBalancedComponents(
   finishCurrent();
 
   return groups;
+}
+
+export function getMinimumBalancedGroupRows(
+  availableRows: number,
+  maxRows: number,
+) {
+  const overflowRows = Math.max(0, availableRows - maxRows);
+  if (!overflowRows) return 0;
+  return overflowRows <= Math.floor(maxRows * FINAL_FIT_OVERFLOW_RATIO)
+    ? overflowRows
+    : 2;
 }
 
 function buildReorderedGroups(
@@ -437,6 +455,10 @@ function buildReorderedGroups(
     const debits = availableEntries("DR");
     const credits = availableEntries("CR");
     let match: BalancedGroup | null = null;
+    const minimumRows = getMinimumBalancedGroupRows(
+      available.size,
+      maxRows,
+    );
 
     for (let attempt = 0; attempt < RANDOM_ATTEMPTS && !match; attempt += 1) {
       const seed = 0x12345678 + groupIndex * 1_009 + attempt * 9_176;
@@ -479,6 +501,7 @@ function buildReorderedGroups(
           debitCandidates,
           creditCandidates,
           maxRows,
+          minimumRows,
           seed,
           debitProbability,
           creditProbability,
